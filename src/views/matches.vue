@@ -1,12 +1,18 @@
 <template>
   <div>
-    <div v-if="teamsLoading && matchesLoading">
+    <!-- <div v-if="fetchFailed = true">
+      <p>FETCH FAILED</p>
+      <v-btn v-on:click="fetchData()">Retry?</v-btn>
+    </div> -->
+    <div v-if="teamsLoading || matchesLoading">
       <loadingSpinner />
     </div>
     <div v-else>
-      <matchWeekSelector ref="matchWeekSelector" :matchesLoading="this.MatchesLoading" />
-      <div v-for="(match, index) in this.matchesData" :key="index" class="matchContainer">
-        <oneMatch :match="match" :teams="teams" />
+      <matchWeekSelector ref="matchWeekSelector" :currentMatchday="this.currentMatchday" />
+      <div class="matchContainer">
+      <div v-for="(match, index) in this.matchesGroup" :key="index">
+        <oneMatch :match="match" :teamsData="teamsData"/>
+      </div>
       </div>
     </div>
   </div>
@@ -26,23 +32,35 @@ export default {
 
     data() {
       return {
-        currentMatchday: '',
-        selectedMatchday: '',
+        currentMatchday: undefined,
+        selectedMatchday: undefined,
+        matchesGroup: undefined,
+        matchesData: undefined,
+        teamsData: undefined,
+        fetchFailed: false,
         teamsLoading: true,
         matchesLoading: true,
-        matchesData: "Data Not Fetched",
-        teamsData: "Data Not Fetched",
       }
     },
-
+    computed: {
+      loadingDataCompute(){
+        if (!teamsLoading && !matchesLoading){
+          this.updatematchWeek(this.currentMatchday)
+        }
+      }
+    },
     methods: {
+      fetchData(){
+        this.fetchFailed = false
+        this.fetchTeams()
+        this.fetchMatches()
+      },
       updatematchWeek(day) {
         this.$refs.matchWeekSelector.setCurrentMatchday(day)
-        this.currentMatchday = day;
         this.selectedMatchday = day;
       },
-      filteredMatches(num) {
-        this.chosenMatches = this.matchList.matches.filter((match) => {
+      filterMatches(num) {
+        this.matchesGroup = this.matchesData.matches.filter((match) => {
           return num == match.matchday;
         })
       },
@@ -55,11 +73,11 @@ export default {
           })
           .then(response => response.json())
           .then(teams => {
-            this.updatematchWeek(teams.season.currentMatchday)
+            this.currentMatchday = teams.season.currentMatchday;
             this.teamsData = teams.teams
             this.teamsLoading = false;
           })
-          .catch(error => console.log(error))
+          .catch(function(){console.log("nigs")})
       },
       fetchMatches() {
         const myRequest = 'http://api.football-data.org/v2/competitions/2021/matches';
@@ -71,17 +89,32 @@ export default {
           .then(response => response.json())
           .then(matchList => {
             this.matchesData = matchList;
-            this.filteredMatches(this.selectedMatchday)
             this.matchesLoading = false;
+            this.filterMatches(this.currentMatchday)
           })
           .catch(error => console.log(error))
+          .then(this.fetchFailed = true)
       },
     },
-    mounted() {
-      this.fetchTeams()
-      this.fetchMatches()
-      console.log(this.$refs)
-    }
+    created() {
+      this.fetchData()
+    },
   }
 
 </script>
+
+<style>
+.matchContainer{
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	align-content: center;
+  width: 100vw;
+  padding-top: 45px;
+  padding-bottom: 98px
+}
+
+</style>
+

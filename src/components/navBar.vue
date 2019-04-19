@@ -1,5 +1,5 @@
 <template>
-<v-bottom-nav fixed :active.sync="bottomNav" :value="true">
+<v-bottom-nav fixed flat :active.sync="bottomNav" :value="true">
     <v-btn color="teal" flat dark value="matches" to="/">
         <span>Matches</span>
         <v-icon>lens</v-icon>

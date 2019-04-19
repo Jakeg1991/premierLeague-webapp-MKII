@@ -1,18 +1,96 @@
 <template>
 <div class="matchInfoContainer">
-    <div class="homeTeamArea" @click="Modal = true">
+    <div class="homeTeamArea" @click="modal = true">
         <div class="teamLogoArea" :style="homeLogoUpdate"></div>
     </div>
     <div class="scoreArea">
-            <p class="score">{{match.score.fullTime.homeTeam}} - {{match.score.fullTime.awayTeam}}</p>
-            <p class="dateInfo">{{match.utcDate.substring(8, 10)+"-"+match.utcDate.substring(5,7
-            )+"-"+match.utcDate.substring(0, 4)}} <br> {{match.utcDate.substring(11, 16)+" GMT"}} </p>
+            <p class="score">{{this.match.score.fullTime.homeTeam}} - {{this.match.score.fullTime.awayTeam}}</p>
+            <p class="dateInfo">{{this.match.utcDate.substring(8, 10)+"-"+this.match.utcDate.substring(5,7
+            )+"-"+this.match.utcDate.substring(0, 4)}} <br> {{this.match.utcDate.substring(11, 16)+" GMT"}} </p>
     </div>
-    <div class="awayTeamArea" @click="Modal = true">
+    <div class="awayTeamArea" @click="modalAway = true">
         <div class="teamLogoArea" :style="awayLogoUpdate"></div>
     </div>
 </div>
 </template>
+
+<script>
+export default {
+    props: [
+        'match',
+        'teamsData',
+    ],
+    data() {
+        return {
+            homeTeamID: undefined,
+            awayTeamID: undefined,
+            homeTeamData: undefined,
+            awayTeamData: undefined,
+            homeTeamName: undefined,
+            awayTeamName: undefined,
+            modal: false,
+            modalAway: false
+        }
+
+    },
+    computed: {
+
+        homeLogoUpdate() {
+            return {
+                'background-image': `url(${this.homeTeamData[0].crestUrl})`,
+            }
+        },
+        awayLogoUpdate() {
+            return {
+                'background-image': `url(${this.awayTeamData[0].crestUrl})`,
+            }
+        }
+    },
+    methods: {
+        // getLogos() {
+        //     for (let i = 0; i <= 19; i++) {
+        //         if (this.teamsData[i].id == this.match.homeTeam.id) {
+        //             this.homeTeamLogo = this.teams[i].crestUrl
+        //         }
+        //         if (this.teamsData[i].id == this.match.awayTeam.id) {
+        //             this.awayTeamLogo = this.teams[i].crestUrl
+        //         }
+        //     }
+        // },
+        filterTeamData(){
+            this.homeTeamData = this.teamsData.filter(team => team.id == this.match.homeTeam.id)
+            this.awayTeamData = this.teamsData.filter(team => team.id == this.match.awayTeam.id)
+        }
+        // getTeamID() {
+        //     this.homeTeamID = this.match.homeTeam.id
+        //     this.awayTeamID = this.match.awayTeam.id
+        // },
+        // getTLA(HomeID, AwayID) {
+        //     for (var i = 0; i <= 19; i++) {
+        //         if (this.teamsData[i].id == this.homeTeamID) {
+        //             this.homeTeamName = this.teams[i].name
+        //         }
+        //         if (this.teamsData[i].id == this.awayTeamID) {
+        //             this.awayTeamName = this.teams[i].name
+        //         }
+        //     }
+        // },
+    },
+    created() {
+        // this.getTeamID();
+        this.filterTeamData();
+        // this.getTLA(this.homeTeamID, this.match.awayTeamID)
+
+
+    },
+    // updated() {
+    //     // this.getTeamID();
+    //     this.filterTeamData();
+    //     // this.getTLA(this.homeTeamID, this.match.awayTeamID)
+    // }
+}
+
+</script>
 
 <style>
 .score {
@@ -37,8 +115,8 @@
     align-items: center;
     align-content: stretch;
     height: 85px;
-    width: 100%;
-    margin: 5px;
+    width: 100vw;
+    margin: 1px;
     background-color: rgba(0, 0, 0, 0.397);
     border-radius: 20px;
     border-color: antiquewhite;
